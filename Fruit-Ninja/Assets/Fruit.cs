@@ -8,7 +8,24 @@ public class Fruit : MonoBehaviour {
 	// instantiating the slice with some physics
 	public GameObject fruitSlicedPrefab;
 
+	public float startForce = 15f;
 
+	// Creating a way to shoot the fruits upwards
+	Rigidbody2D rb;
+
+	void Start ()
+	{
+		// On Instantiation of the the game object get the reference of the rigidbody and
+		// addforce to the rigidbody
+
+		rb = GetComponent<Rigidbody2D>();
+
+		// The addforce needs the direction and the force float. 
+		// The mode of the force is impluse. Since we are only adding it once as an impluse
+
+		rb.AddForce(transform.up * startForce, ForceMode2D.Impulse);
+	
+	}
 	// Here we want a method that is invoked whenever we detect something triggering and entering
 	// We are using the default unity method for 2D
 	void OnTriggerEnter2D (Collider2D col)
@@ -27,10 +44,12 @@ public class Fruit : MonoBehaviour {
 
 			Quaternion rotation = Quaternion.LookRotation (direction);
 
-			Instantiate(fruitSlicedPrefab, transform.position, rotation);
+			// Get the ref of the instantiated game object
+
+			GameObject slicedFruit =  Instantiate(fruitSlicedPrefab, transform.position, rotation);
 
 			// Then we destroy gameobject - > fruit
-			Destroy(gameObject);
+			Destroy(slicedFruit, 3f);
 		}
 	}
 }
