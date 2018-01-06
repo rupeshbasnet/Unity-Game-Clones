@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Knife : MonoBehaviour {
 
@@ -10,6 +11,8 @@ public class Knife : MonoBehaviour {
 	private Vector2 startSwipe;
 
 	private Vector2 endSwipe;
+
+	private float timeWhenFlying;
 
 	public float torque = 20f;
 
@@ -27,6 +30,9 @@ public class Knife : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (!rb.isKinematic) {
+			return;
+		}
 		if (Input.GetMouseButtonDown (0)) 
 		{
 			startSwipe = Camera.main.ScreenToViewportPoint(Input.mousePosition);
@@ -39,10 +45,12 @@ public class Knife : MonoBehaviour {
 		}
 	}
 
-	void Swipe() 
+	void Swipe()  
 	{
 
 		rb.isKinematic = false;
+
+		timeWhenFlying = Time.time;
 
 		Vector2 swipe = endSwipe - startSwipe;
 
@@ -55,13 +63,35 @@ public class Knife : MonoBehaviour {
 
 	}
 
-	void OnTriggerEnter()
+	void OnTriggerEnter(Collider col)
 	{
-		// We set the rigidbody's is kinematic to truw which will freeze the rotation
-		// A kinematic rb won't move unless its told to move
-		rb.isKinematic = true;
-
+		if (col.tag == "Block") {
+			// We set the rigidbody's is kinematic to truw which will freeze the rotation
+			// A kinematic rb won't move unless its told to move
+			rb.isKinematic = true;
+		} else {
+			Restart ();
+		}
 		// But this will make the knife unmoveable after it is set to iskinematic true 
 		// So therefore we will be setting the iskinematic to false again on another swipe
 	}
+
+	// On Colliding with the box collider
+	void OnCollisionEnter()
+	{
+		
+		float timeInAir = Time.time - timeWhenFlying;
+		if (!rb.isKinematic && timeInAir >= .05f) 
+		{
+			Restart ();
+		}
+	}
+
+	// Restart method to restart the scene when we screw up
+	void Restart() 
+	{
+		SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex);
+	}
+
+
 }
